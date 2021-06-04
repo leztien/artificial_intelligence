@@ -1,7 +1,6 @@
 
 """
 Propositional Logic
-
 Clue game
 """
 
@@ -147,7 +146,7 @@ def ask(kb, p):
 
 
 def solve_clue_game(knowledge, propositions):
-    pad = 12
+    pad = 13
     d = {'Yes':'green', 'No':'red', 'Maybe':'blue'}
     for p in propositions:
         ans = ask(knowledge, p)
@@ -190,9 +189,9 @@ print("entails:", ent, "\t answer:", ans, end='\n\n')
 
 
 ### THE 'CLUE' GAME ###
-p1 = Proposition("ColMustard")
-p2 = Proposition("ProfPlum")
-p3 = Proposition("MsScarlet")
+p1 = Proposition("Col_Mustard")
+p2 = Proposition("Prof_Plum")
+p3 = Proposition("Ms_Scarlet")
 characters = [p1,p2,p3]
 
 r1 = Proposition("ballroom")
@@ -212,24 +211,17 @@ kb = And(Or(p1,p2,p3),
          Or(r1,r2,r3),
          Or(w1,w2,w3))
 
-# One card is drawn
+# Some cards are drawn
 kb.add(Not(p1))
+kb += Not(r2)
+kb = kb + Not(w2)
 
+# A player makes a wrng guess
+kb += Or(Not(p3), Not(r3), Not(w3))
 
-# Some other cards are drawn
-kb.add(Not(p2))
-kb.add(Not(r2))
-kb.add(Not(r1))
-kb.add(Not(w2))
-
-# A player makes a (wrong) guess
-kb += Not(And(p2, r2, w2))
-
-# A second player makes a wrong guess
-kb = kb + Or(Not(p3), Not(r2), Not(w2))
-
-# Finaly a third pplayer makes a wrong guess at which stage the system gueses correctly
-kb += Or(Not(p3), Not(r3), Not(w3))  # COMMENT THIS LINE OUT TO SEE THE DIFFERENCE
+# More cards are drawn
+kb += Not(p2)
+kb += Not(r1)   # COMMENT THIS LINE OUT TO SEE THE DIFFERENCE
 
 # Attemp a solution
 solve_clue_game(knowledge=kb, propositions=propositions)
