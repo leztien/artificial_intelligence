@@ -1,10 +1,13 @@
-
 """
 Adverserial Search with Tic-Tac-Toe
+- with minimax returning numerical values and find_best_move() function that returns the best state
+- State class encapsulates all relevant attributes and funcions(i.e. methods)
 """
 
+from typing import List, Tuple
 from enum import Enum
 from math import inf
+from copy import deepcopy
 
 
 
@@ -15,15 +18,94 @@ class Player(Enum):
 
 
 
-
 class State():    
     def __init__(self, *args, **kwargs):
         self._mx = list(args[0]) if args else [[Player.EMPTY,]*3 for _ in range(3)]
+        self._utility = kwargs.get("utility", None)   # None by default
+        self._terminal = None
+        self._player = None
+        self._actions = None
+        
         # Check state validity
         l = sum(self._mx, [])
         xx,oo = (l.count(v) for v in (Player.X, Player.O))
-        assert 0 <= (xx - oo) <=1, "invalid state"
-        self.utility = None
+        if not(0 <= (xx - oo) <=1):
+            raise ValueError("Invalid board state")
+    
+    @property
+    def player(self) -> Player:
+        """Returns the player who's turn it is"""
+        xx,oo = (sum(self._mx, []).count(v) for v in (Player.X, Player.O))
+        self._player = Player.X if (xx - oo) == 0 else Player.O
+        return self._player
+    
+    @property
+    def turn(self):
+        ...
+        
+    @property
+    def actions(self) -> List[Tuple[int,int]]:
+        """Returns valid moves from this state"""
+        self._actions = [(i,j) for i in range(3) for j in range(3) if self._mx[i][j] == Player.EMPTY]
+        return self._actions
+        
+    def result(self, action) -> 'State':
+        """returns the next state"""
+        assert min(action) >= 0 and max(action) <= 2
+        copy = deepcopy(self._mx)
+        r,c = action
+        if copy[r][c] != Player.EMPTY:
+            raise ValueError("bad action (tuple-index)")
+        copy[r][c] = self.player
+        s = State(copy)
+        
+        # attach move in str-form for printing purposes
+        r,c = [(i,j) for i in range(3) for j in range(3) if self._mx[i][j] != s._mx[i][j]][0]
+        s.move = "ABC"[r] + str(c+1)
+        return s
+    
+    def children(self) -> List:
+        """returns next states from this state.
+        This is a wrapper-function around actions() and result() methods"""
+        return [self.result(action) for action in self.actions]
+    
+    @property
+    def terminal(self) -> bool:
+        """is this state terminal?"""
+        if self.utility:
+            return True
+        
+        l = sum(self._mx, [])
+        slices = [slice(i,None,3) for i in range(3)] + [slice(None,None,4), slice(2,-1,2)]
+        
+        for e in self._mx + slices:
+            S = set(l[e] if isinstance(e, slice) else e)
+            if not {Player.X, Player.O}.issubset(S) and Player.EMPTY in S:
+                self._terminal = False
+                return self._terminal
+        self._terminal = True
+        return self._terminal
+    
+    @property
+    def utility(self) -> int or float:
+        """returns the utility"""
+        if self._utility:
+            return self._utility
+        # Else:  calculate and return
+        l = sum(self._mx, [])
+        slices = [slice(i,None,3) for i in range(3)] + [slice(None,None,4), slice(2,-1,2)]
+        
+        for e in self._mx + slices:
+            t = l[e] if isinstance(e, slice) else e
+            if t.count(Player.X) == 3:
+                return 1
+            elif t.count(Player.O) == 3:
+                return -1
+        return 0  
+    
+    @utility.setter
+    def utility(self, value):
+        self._utility = value
     
     def __str__(self):
         return str.join('\n', ((str.join('', (v.value for v in row))) for row in self._mx))
@@ -35,98 +117,35 @@ class State():
 
 
 
-
-def get_player(state):
-    l = sum(state._mx, [])
-    xx,oo = (l.count(v) for v in (Player.X, Player.O))
-    return Player.X if xx - oo == 0 else Player.O
-    
-
-def get_actions(state):
-    """returns a list of tuples"""
-    return [(i,j) for i in range(3) for j in range(3) if state._mx[i][j] == Player.EMPTY]
-
-
-def get_result(state, action) -> State:
-    assert min(action) >= 0 and max(action) <= 2
-    copy = [[v for v in row] for row in state._mx]
-    r,c = action
-    if copy[r][c] != Player.EMPTY:
-        raise ValueError("bad action (tuple-index)")
-    player = get_player(state)
-    copy[r][c] = player
-    return State(copy)
-    
-
-
-def is_terminal(state) -> bool:
-    if utility(state):
-        return True
-    
-    l = sum(state._mx, [])
-    slices = [slice(i,None,3) for i in range(3)] + [slice(None,None,4), slice(2,-1,2)]
-    
-    for e in state._mx + slices:
-        S = set(l[e] if isinstance(e, slice) else e)
-        if not {Player.X, Player.O}.issubset(S) and Player.EMPTY in S:
-            return False
-    return True
-        
-    
-
-
-def utility(state, depth=None) -> int:
-    l = sum(state._mx, [])
-    slices = [slice(i,None,3) for i in range(3)] + [slice(None,None,4), slice(2,-1,2)]
-    depth = abs(depth or 1)
-    
-    for e in state._mx + slices:
-        t = l[e] if isinstance(e, slice) else e
-        if t.count(Player.X) == 3:
-            return 1 / depth
-        elif t.count(Player.O) == 3:
-            return -1 / depth
-    return 0            
-    
-    
-
-def minimax(state, maximizing=False, depth=0):
+def minimax(state, maximizing):
     # Base case
-    if is_terminal(state):
-        state.utility = utility(state, depth=depth)
-        if depth==0: return state
-        else: return state.utility
-    
-    # Recursion
-    actions = get_actions(state)
-    children = [get_result(state, action) for action in actions]
-    
+    if state.terminal:
+        return state.utility
+    # Recusrive cases
+    best = -inf if maximizing else inf
     if maximizing:
-        best = -inf
-        for child in children:
-            v = minimax(child, maximizing=False, depth=depth-1)
-            if depth==0:
-                child.utility = v
-                v = child
+        for action in state.actions:
+            child = state.result(action)
+            v = minimax(child, maximizing=False)
             best = max(v, best)
     else:
-        best = inf
-        for child in children:
-            v = minimax(child, maximizing=True, depth=depth-1)
-            if depth==0:
-                child.utility = v
-                v = child
+        for child in state.children():  # slightly different implementation
+            v = minimax(child, maximizing=True)
             best = min(v, best)
-    # Figure out what move the ai has made for printing purposes
-    if depth == 0 and isinstance(best, State):
-        r,c = [(i,j) for i in range(3) for j in range(3) if state._mx[i][j] != best._mx[i][j]][0]
-        move = "ABC"[r] + str(c+1)
-        best.move = move
     return best
-        
-
     
-def wrapper(func):
+    
+def find_best_move(state):
+    """Retunrs the best action/state for the MIN player"""
+    best = inf
+    for s in state.children():
+        s.utility = minimax(s, maximizing=True)
+        best = min(s, best)   # best is a State()
+    return best
+    
+
+
+def decorator(func):
     """Checks whether the square chosen by the user is occupied"""
     def closure(*args, **kwargs):
         state = kwargs.get("state")
@@ -138,7 +157,7 @@ def wrapper(func):
                 return user_input
             
             # Get allowed actions (i.e. moves) - if not provided by the user
-            actions = actions or get_actions(state)
+            actions = actions or state.actions
             
             # Check validity of the move
             if user_input not in actions:
@@ -148,7 +167,7 @@ def wrapper(func):
     return closure
 
 
-@wrapper
+@decorator
 def get_input():
     rows = {'a':0, 'b':1, 'c':2}
     cols = {str(i+1):i for i in range(3)}
@@ -161,12 +180,11 @@ def get_input():
         else:
             return (rows[s[0]], cols[s[1]])
 
-    
 
 def check_winner(state):
-    if is_terminal(state):
+    if state.terminal:
         print(state)
-        cost = utility(state)
+        cost = state.utility
         winner = {0:None, 1:Player.X, -1:Player.O}[cost]
         if not winner:
             print("\nDRAW")
@@ -181,18 +199,18 @@ def controller():
     
     # Initial state
     s = State()
-    print("\nTIC TAC TOE", s, sep='\n')
+    print("\nYou play as X", s, sep='\n')
     
     while True:    
         # Human's move
         a = get_input(state=s)
-        s = get_result(s,a)
+        s = s.result(a)
         
         winner = check_winner(s)
         if winner: break
         
         # AI's move
-        s = minimax(s)   # s = AI's move
+        s = find_best_move(s)   # s = AI's move
         print(f"My move: {s.move}")
         
         winner = check_winner(s)
