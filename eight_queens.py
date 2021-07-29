@@ -33,22 +33,18 @@ def ok(M):
     are none of the queens so far threatened (by any other)?
     """
     k = len(M)
-    # Check row threat
-    for row in M:
-        if sum(row) > 1:
-            return False
-    # Check column threat
     a = sum(M, [])
-    for i in range(k):
-        col = a[i::k]
-        if sum(col) > 1:
-            return False
-    # Check diagonal
     d = defaultdict(list)
+    
     for i in range(k):
+        # Check row i and column i
+        if sum(M[i]) > 1 or sum(a[i::k]) > 1:
+            return False
+        # Scan diagonals, add to the dict
         for j in range(k):
             d[i-j].append(M[i,j])
             d[i+j+k].append(M[i,j])
+    # Check the diagonals
     for l in d.values():
         if sum(l) > 1:
             return False
@@ -57,12 +53,14 @@ def ok(M):
     
     
 def queens(M, i=0):
+    """
+    backtracking eight queens
+    """
     k = len(M)
-    
-    # Base
+    # base case
     if i == k:
         return M
-    # Recursive
+    # Recursive case
     nx = list(range(k))
     shuffle(nx)
     
@@ -73,9 +71,10 @@ def queens(M, i=0):
             if result:
                 return result
         M[i,j] = 0
-    # None of the tried squares in this row is ok - return False i.e. get to the previous row
+    # None of the squares in this row is ok
     return False
-
+    
+    
 ###########################################################
 
 k = 8
