@@ -1,1 +1,1 @@
-# artificial_intelligence
+# basic artificial intelligence algorithms
