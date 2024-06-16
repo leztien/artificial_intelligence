@@ -50,6 +50,11 @@ class Agent:
         return percept
     
     def push_state(self, state):
+        """
+        this method is called by the environment.
+        It presents an agent with the current actual state
+        and solicits an action from the agent
+        """
         percept = self.get_reading_from_sensor(state)
         action = self.get_action(percept)
         return action
@@ -70,7 +75,7 @@ class Environment:
     def transition_model(state, action):
         """
         this transition model is accessible both by the environment itself
-        and my an agent
+        and by an agent
         """
         # the new state is just one square further
         new_state = state + 1 if action else 0
