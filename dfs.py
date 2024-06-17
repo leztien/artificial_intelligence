@@ -2,22 +2,24 @@
 DFS (no frills)
 """
 
-import networkx as nx
+
+from enum import Enum
 import numpy as np
 import matplotlib.pyplot as plt
+import networkx as nx
+
 
 
 def make_adjacency_matrix(n_nodes, density=None, seed=None):
     """makes a random adjacency matrix representing a graph"""
     n = n_nodes
-    p = density or np.log(n_nodes)/10/n_nodes
+    p = density or np.log(n_nodes) / 10 / n_nodes
     
     # Random seed
     if seed is True:
         seed = np.random.randint(1,9999)
         print("seed =", seed)
     rs = np.random.RandomState(seed)
-    
     
     while True:
         mx = rs.rand(n,n)
@@ -27,7 +29,6 @@ def make_adjacency_matrix(n_nodes, density=None, seed=None):
         mx[np.diag_indices(n)] = 0
         assert (mx == mx.T).all()
         
-        
         if np.logical_or.reduce(mx, axis=0).all() and np.logical_or.reduce(mx, axis=1).all():
             break
         else:
@@ -35,15 +36,26 @@ def make_adjacency_matrix(n_nodes, density=None, seed=None):
     return(mx)
 
 
-#display the graph
-mx = make_adjacency_matrix(n_nodes=10, seed=True)
-G = nx.from_numpy_matrix(mx)
-nx.draw(G, with_labels=True)
-print(mx)
+def display_graph(mx):
+    """converts an adjacency matrix into a graph"""
+    try:
+        G = nx.from_numpy_matrix(mx)
+    except AttributeError:
+        G = nx.from_numpy_array(mx)
+    nx.draw(G, with_labels=True)
 
-##################################################################
 
-from enum import Enum
+def make_nodes_list(mx):
+    nodes = [Node(node_id=i) for i in range(len(mx))]
+    nodes[0].node_type = NodeType.INITIAL
+    nodes[-1].node_type = NodeType.GOAL
+    
+    for row, node in zip(mx, nodes):
+        node.neighbors = [nodes[ix] for ix,value in enumerate(row) if value]
+    return nodes
+
+
+############################################################
 
 
 class NodeType(Enum):
@@ -61,23 +73,8 @@ class Node:
     def __str__(self):
         return "{}({})".format(self.__class__.__name__, self.node_id)
     def __repr__(self):
-        return self.__str__()
-        
+        return self.__str__()        
 
-def make_nodes_list(mx):
-    nodes = [Node(node_id=i) for i in range(len(mx))]
-    nodes[0].node_type = NodeType.INITIAL
-    nodes[-1].node_type = NodeType.GOAL
-    
-    for row, node in zip(mx, nodes):
-        node.neighbors = [nodes[ix] for ix,value in enumerate(row) if value]
-    return nodes
-
-
-nodes = make_nodes_list(mx)
-
-
-############################################################
 
 def dfs(nodes):
     frontier = [nodes[0],]
@@ -105,5 +102,19 @@ def dfs(nodes):
     return None
 
 
-solution = dfs(nodes)
-print(solution)
+
+# DEMO
+if __name__ == '__main__':
+    
+    # generate a random adjacency matrix
+    mx = make_adjacency_matrix(n_nodes=10, seed=True)
+    print(mx)
+    
+    # display the graph
+    display_graph(mx)
+    
+    # make a collection of nodes
+    nodes = make_nodes_list(mx)
+    
+    solution = dfs(nodes)
+    print("\nsolution path:", solution)
