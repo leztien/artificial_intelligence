@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 """
-uniform-cost search (AIMA page 95)
+Uniform-cost search aka Dijkstra's algorithm
+AIMA page 95
 """
 
 
