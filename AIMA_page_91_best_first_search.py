@@ -7,11 +7,11 @@ very close to the pseudo-code in AIMA on page 91
 
 
 from abc import ABC, abstractmethod, abstractproperty
+from typing import NamedTuple, Union, Optional, Any
 from dataclasses import dataclass
 import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx
-
 
 
 class PriorityQueue:
@@ -75,27 +75,24 @@ class PriorityQueue:
         return item
         
 
-@dataclass
-class State:
-    id: int or str
-    def __str__(self): return f"{self.id}"
+
+class State(NamedTuple):
+    """immutable"""
+    id: Union[int, str]  # e.g. State(1), State('INITIAL')
     def __repr__(self): return "{}({})".format(self.__class__.__name__, self.id)
+    def __str__(self): return f"{self.id}"
     def __hash__(self): return hash(self.id)
-    
-    
+
+
+@dataclass
 class Node:
-    """
-    Wrapper for a State
-    """
-    def __init__(self, state, parent=None, action=None, path_cost=None):
-        self.state:State = state
-        self.parent:Node = parent
-        self.action:object = action  # action taken to get to this node
-        self.path_cost:float = float(path_cost or 0.0)
-        
+    """mutable"""
+    state: State
+    parent: Optional['Node'] = None
+    action: Optional[Any] = None
+    path_cost: Optional[float] = 0.0
+    def __repr__(self): return "{}({})".format(self.__class__.__name__, self.state)
     def __lt__(self, other): return self.path_cost < other.path_cost
-    def __str__(self): return "{}({})".format(self.__class__.__name__, self.state)
-    def __repr__(self): return self.__str__()
 
 
 class Action:
@@ -104,6 +101,7 @@ class Action:
     def __str__(self): return "{}(go to {})".format(self.__class__.__name__, self.go_to_state)
     def __repr__(self): return self.__str__()
     
+
 
 class AbstractSearchProblem(ABC):
     """
@@ -309,8 +307,3 @@ if __name__ == '__main__':
         
             solution_path = solution_path[::-1]
             print("solution path:", solution_path, end="\n\n")
-
-
-
-
-
