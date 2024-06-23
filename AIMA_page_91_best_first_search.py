@@ -249,9 +249,9 @@ class SearchProblem(AbstractSearchProblem):
         bzw, states
         """
         state = node.state
-        for action in problem.actions(state):
-            next_state = problem.result(state, action)
-            cost = node.path_cost + problem.action_cost(state, action, next_state)
+        for action in self.actions(state):
+            next_state = self.result(state, action)
+            cost = node.path_cost + self.action_cost(state, action, next_state)
             yield Node(state=next_state, parent=node, action=action, path_cost=cost)
         
 
