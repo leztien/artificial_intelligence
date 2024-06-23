@@ -1,4 +1,3 @@
-#AIMA_91_best_first_search.py
 
 """
 best first search
