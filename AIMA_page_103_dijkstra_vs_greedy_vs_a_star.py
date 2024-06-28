@@ -2,7 +2,7 @@
 
 """
 generic Best-first search algorithm
-and three concrete algorithms:
+and three concrete algorithms based thereupon:
     1. Dijkstra aka uniform-cost
     2. Greedy
     3. A*
@@ -215,14 +215,6 @@ class PriorityQueue:
 
 ##### Problem data structures #####
 
-"""
-class State(NamedTuple):
-    "immutable"
-    id: Union[int, str]  # e.g. State(1), State('INITIAL')
-    def __repr__(self): return "{}({})".format(self.__class__.__name__, self.id)
-    def __str__(self): return f"{self.id}"
-    def __hash__(self): return hash(self.id)
-"""
 
 @dataclass
 class Node:
@@ -232,15 +224,7 @@ class Node:
     path_cost: Optional[float] = 0.0
     heuristic: Optional[float] = float('inf')
     def __repr__(self): return "{}({})".format(self.__class__.__name__, self.state)
-    #def __lt__(self, other): return self.path_cost < other.path_cost
 
-"""
-class Action:
-    "an action can be any appropriate object, str, int, float, custom structured object, etc"
-    def __init__(self, go_to_state): self.go_to_state = go_to_state
-    def __str__(self): return "{}(go to {})".format(self.__class__.__name__, self.go_to_state)
-    def __repr__(self): return self.__str__()
-"""   
     
 class AbstractSearchProblem(ABC):
     """
@@ -339,8 +323,6 @@ class SearchProblem(AbstractSearchProblem):
 
         
 
-
-
 ##### Search algorithms #####
 
 def best_first(problem, f):
@@ -434,5 +416,3 @@ if __name__ == '__main__':
         # 3. a-star
         solution = uniform_cost(problem)
         visualize_results(problem, solution, text="A*")
-
-
