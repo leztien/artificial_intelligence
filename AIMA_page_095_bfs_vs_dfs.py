@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Breadth First search
-iterative Depth First search
-recursive Depth First search
+BFS vs DFS
 """
 
 
@@ -92,6 +90,7 @@ class AbstractQueue(ABC):
     def __getitem__(self, index): return self._items[index]
     def __delitem__(self, index): del self._items[index]
     def __len__(self): return len(self._items)
+    def __bool__(self): return len(self._items) > 0
     def is_empty(self): return len(self) == 0
     def add(self, item): self._items.append(item)
     @abstractmethod
@@ -204,7 +203,7 @@ class SearchProblem(AbstractSearchProblem):
 
 def search(problem, search_type="BFS"):
     """
-    BFS bzw DFS
+    BFS vs DFS
     """
     node = Node(problem.initial)
     
@@ -214,7 +213,7 @@ def search(problem, search_type="BFS"):
     frontier = Queue([node,]) if str(search_type).upper()=='BFS' else Stack([node,])
     reached = {problem.initial}  # a set of states
     
-    while not frontier.is_empty():
+    while frontier:
         node = frontier.pop()
         for child in problem.expand(node):
             state = child.state
@@ -228,7 +227,7 @@ def search(problem, search_type="BFS"):
     return None
 
 
-def recurse(node, problem, reached):
+def _recurse(node, problem, reached):
     """The recurser function for the recursive depth first search"""
     # base case
     if problem.is_goal(node.state):
@@ -241,7 +240,7 @@ def recurse(node, problem, reached):
         if child.state in reached:
             continue
         
-        output = recurse(child, problem, reached)
+        output = _recurse(child, problem, reached)
         if output is not None:
             return output
         
@@ -252,7 +251,7 @@ def recurse(node, problem, reached):
 def recursive_search(problem):
     """Recursive depth first search. Kick-starts the recurse() function"""
     reached = set()
-    return recurse(Node(problem.initial), problem, reached)
+    return _recurse(Node(problem.initial), problem, reached)
 
 
 
@@ -288,11 +287,8 @@ if __name__ == '__main__':
         
         # RECURSIVE SEARCH
         solution = recursive_search(problem)
-        print("solution", solution, end="\t\t")
+        print("solution:", solution, end="\t\t")
         
         if solution:
             solution_path = problem.get_solution_path(solution)
             print("Recursive solution path:", solution_path)
-
-
-
