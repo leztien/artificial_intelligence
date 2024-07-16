@@ -386,53 +386,52 @@ class Demo(GetAcrossTheRiverProblem):
 
 
 if __name__ == '__main__':
-    ...
 
-##### Missionaries and cannibals #####
-print("\nMissionaries and cannibals".upper())
-initial_state_representation = (1, 3, 3)  # 1 boat, 3 missionaries, 3 cannibals
-boat_capacity = (1, 2)  # min, max
-
-State = state_class_factory(initial_state_representation)
-initial_state = State(initial_state_representation)
-
-problem = MissionariesAndCannibals(initial_state, boat_capacity)
-solution = problem.solve()
-path = problem.get_solution_path(solution)
-
-for e in path:
-    print(e)
-
-
-##### Wolf, Goat, Cabbage #####
-print("\n\n\nWolf, Goat, Cabbage".upper())
-initial_state_representation = (1, 1,1,1)
-boat_capacity = (0, 1)
-
-State = state_class_factory(initial_state_representation)
-initial_state = State(initial_state_representation)
-
-problem = WolfGoatCabbage(initial_state, boat_capacity)
-solution = problem.solve()
-path = problem.get_solution_path(solution)
-
-for e in path:
-    print(e)
-
-
-
-##### A generic "Get across the river" problem #####
-print("\n\n\nGeneric demo".upper())
-print("(A = boat, B,C,D,E = four groups of players)")
-initial_state_representation = (1, 2,3,4,5)  
-boat_capacity = (2, 6)  # at least 2 ppl must steer the boat
-
-State = state_class_factory(initial_state_representation)
-initial_state = State(initial_state_representation)
-
-problem = Demo(initial_state, boat_capacity)  
-solution = problem.solve()
-
-path = problem.get_solution_path(solution)
-for e in path:
-    print(e)
+    ##### Missionaries and cannibals #####
+    print("\nMissionaries and cannibals".upper())
+    initial_state_representation = (1, 3, 3)  # 1 boat, 3 missionaries, 3 cannibals
+    boat_capacity = (1, 2)  # min, max
+    
+    State = state_class_factory(initial_state_representation)
+    initial_state = State(initial_state_representation)
+    
+    problem = MissionariesAndCannibals(initial_state, boat_capacity)
+    solution = problem.solve()
+    path = problem.get_solution_path(solution)
+    
+    for e in path:
+        print(e)
+    
+    
+    ##### Wolf, Goat, Cabbage #####
+    print("\n\n\nWolf, Goat, Cabbage".upper())
+    initial_state_representation = (1, 1,1,1)
+    boat_capacity = (0, 1)
+    
+    State = state_class_factory(initial_state_representation)
+    initial_state = State(initial_state_representation)
+    
+    problem = WolfGoatCabbage(initial_state, boat_capacity)
+    solution = problem.solve()
+    path = problem.get_solution_path(solution)
+    
+    for e in path:
+        print(e)
+    
+    
+    
+    ##### A generic "Get across the river" problem #####
+    print("\n\n\nGeneric demo".upper())
+    print("(A = boat, B,C,D,E = four groups of players)")
+    initial_state_representation = (1, 2,3,4,5)  
+    boat_capacity = (2, 6)  # at least 2 ppl must steer the boat
+    
+    State = state_class_factory(initial_state_representation)
+    initial_state = State(initial_state_representation)
+    
+    problem = Demo(initial_state, boat_capacity)  
+    solution = problem.solve()
+    
+    path = problem.get_solution_path(solution)
+    for e in path:
+        print(e)
