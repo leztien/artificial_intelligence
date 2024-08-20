@@ -1,4 +1,4 @@
-
+#AIMA_page_237_compute_truth_value.py
 """
 Compute the truth value of a proporitionla logi sentence
 """
@@ -46,9 +46,9 @@ if __name__ == '__main__':
     
     # Constuct a sentence
     s = ('AND', p, q)
-    s = ('NOT', s, None)
     s = ('OR', s, r)
-    s = ('IMP', r, s)
+    s = ('NOT', s, None)
+    s = ('IMP', s, q)
     s = ('IIF', s, ('OR', p, q))
     
     # Define a model
